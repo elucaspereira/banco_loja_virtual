@@ -1,0 +1,10 @@
+{
+  "applications": {
+    "_default": {
+      "link": "loja-virtual"
+    },
+    "loja-virtual": {
+      "applicationId": "Xe834hhkImeNQ7k8uX01upUSxu0SXXLlSC2labah"
+    }
+  }
+}
