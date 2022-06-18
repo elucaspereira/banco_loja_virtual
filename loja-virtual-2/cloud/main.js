@@ -61,7 +61,7 @@ Parse.Cloud.define("new-user", async (request) =>{
   const email = request.params.email;
   const password = request.params.password;
   if(username == null) throw "O campo username deve ser preenchido";
-  if(email == null) throw "O campo email deve ser preenchido";
+  if(email == null || email.length == 0) throw "O campo email deve ser preenchido";
   if(password== null) throw "O campo password deve ser preenchido";
 
   const user = new User();
