@@ -2,9 +2,9 @@ const Product = Parse.Object.extend("Product");
 Parse.Cloud.define("create-product", async (request) => {
   const stock = request.params.stock;
   const price = request.params.price;
-  if(stock == null || stock > 999) throw "Deve ser informando uma quantidade válida para o campo estoque";
+  if(stock == null || stock.length == 0) throw "Deve ser informando uma quantidade válida para o campo estoque";
   if(stock < 0) throw "Estoque nao pode ser negativo";
-  if(price == null || stock < 0) throw "O preço informado é inválido"
+  if(price == null || price < 0) throw "O preço informado é inválido";
   const product = new Product();
   product.set("name", request.params.name); //passando a requisiçao por parametro para adicionar os dados por Json
   product.set("price", request.params.price);
@@ -18,8 +18,8 @@ Parse.Cloud.define("create-product", async (request) => {
 Parse.Cloud.define("change-price", async (request) => {
   const id = request.params.productId;
   const price = request.params.price;
-  if(id == null) throw "Informe o ID do produto";
-  if(price == null) throw "Prenecha o  Campo Preço"
+  if(id == null || id == '') throw "Informe o ID do produto";
+  if(price == null || price == '') throw "Prenecha o  Campo Preço";
 
   const product = new Product();
   product.id = request.params.productId;
@@ -32,7 +32,7 @@ Parse.Cloud.define("change-price", async (request) => {
 //funçao para atualizar todas as informaçoes dde um produto 
 Parse.Cloud.define("update-products", async (request) => {
   const id = request.params.productId;
-  if(id == null) throw "Deve ser informado o id do produto"
+  if(id == null || id == '') throw "Deve ser informado o id do produto";
 
   const product = new Product();
   product.id = request.params.productId;
@@ -46,7 +46,8 @@ Parse.Cloud.define("update-products", async (request) => {
 
 //deletar um produto
 Parse.Cloud.define("delete-product", async (request) => {
-  if(request.params.productId == null) throw 'Produto invalido';
+  if(request.params.productId == null) throw "Produto invalido";
+  if(request.params.productId == '') throw "Deve ser informado o Id do produto";
   const product = new Product();
   product.id = request.params.productId
 
@@ -60,9 +61,9 @@ Parse.Cloud.define("new-user", async (request) =>{
   const username = request.params.username;
   const email = request.params.email;
   const password = request.params.password;
-  if(username == null) throw "O campo username deve ser preenchido";
-  if(email == null || email.length == 0) throw "O campo email deve ser preenchido";
-  if(password== null) throw "O campo password deve ser preenchido";
+  if(username == null || username == "") throw "O campo username deve ser preenchido";
+  if(email == null || email == "") throw "O campo email deve ser preenchido";
+  if(password== null || password == "") throw "O campo password deve ser preenchido";
 
   const user = new User();
   user.set("username", request.params.username);
