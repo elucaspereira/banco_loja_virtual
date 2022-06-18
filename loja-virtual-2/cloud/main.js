@@ -58,8 +58,8 @@ Parse.Cloud.define("delete-product", async (request) => {
 const User = Parse.Object.extend("User");
 Parse.Cloud.define("new-user", async (request) =>{
   const username = request.params.username;
-  const email = request.email.email;
-  const password = request.email.password;
+  const email = request.params.email;
+  const password = request.params.password;
   if(username == null) throw "O campo username deve ser preenchido";
   if(email == null) throw "O campo email deve ser preenchido";
   if(password== null) throw "O campo password deve ser preenchido";
@@ -67,7 +67,7 @@ Parse.Cloud.define("new-user", async (request) =>{
   const user = new User();
   user.set("username", request.params.username);
   user.set("email", request.params.email);
-  user.set("password", request.parse.password);
+  user.set("password", request.params.password);
   const savedUser = await user.save(null, {useMasterKey: true});
   return "Usuário criado com sucesso"
 }); 
