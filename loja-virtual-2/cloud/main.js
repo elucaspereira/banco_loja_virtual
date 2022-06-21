@@ -54,6 +54,42 @@ Parse.Cloud.define("delete-product", async (request) => {
   await product.destroy({useMasterKey: true});
   return "Pruduto excluído com sucesso";
 });
+// Query para produtos esecificos 
+Parse.Cloud.define("get-product", async (request) => {
+  if(request.params.productId == null) throw "Produto invalido";
+  if(request.params.productId == '') throw "Deve ser informado o Id do produto";
+
+  const query = new Parse.Query(Product);
+  const product = await query.get(request.params.productId, {useMasterKey: true});
+  const json = product.toJSON();
+  return {
+    name: json.name,
+    stock: json.stock,
+    price: json.price
+    
+  }; 
+}); 
+// Query para listar todos os produtos
+Parse.Cloud.define("list-product", async (request) => {
+  const query = new Parse.Query(Product);
+  //condições da busca
+  query.equalTo("isSelling", true);
+  query.greaterThanOrEqualTo("price", 1000);
+  query.lessThanOrEqualTo("price", 3000);
+  query.greaterThan("stock", 0);
+  query.ascending("stock");
+  
+  const product = await query.find({useMasterKey: true});
+  return product.map(function(p) {
+    p = p.toJSON();
+    return{
+      name: p.name,
+      price: p.price,
+      stock: p.stock
+    }
+  });
+
+});
 
 //criando usuario
 const User = Parse.Object.extend("User");
