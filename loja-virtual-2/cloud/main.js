@@ -1,14 +1,23 @@
 const Product = Parse.Object.extend("Product");
+const Brand = Parse.Object.extend("Brand");
+
 Parse.Cloud.define("create-product", async (request) => {
   const stock = request.params.stock;
   const price = request.params.price;
+
   if(stock == null || stock.length == 0) throw "Deve ser informando uma quantidade válida para o campo estoque";
   if(stock < 0) throw "Estoque nao pode ser negativo";
+  if(request.params.brandId == null)throw "Marca invalida";
   if(price == null || price < 0) throw "O preço informado é inválido";
+
+  const brand = new Brand();
+  brand.id = request.params.brandId; 
+
   const product = new Product();
   product.set("name", request.params.name); //passando a requisiçao por parametro para adicionar os dados por Json
   product.set("price", request.params.price);
   product.set("stock", request.params.stock );
+  product.set("brand", brand);
   product.set("isSelling", request.params.isSelling);
   const savedProduct = await product.save(null, {useMasterKey: true});
   return savedProduct.id
@@ -62,12 +71,13 @@ Parse.Cloud.define("get-product", async (request) => {
   const query = new Parse.Query(Product);
   const product = await query.get(request.params.productId, {useMasterKey: true});
   const json = product.toJSON();
-  return {
+  return product;
+  /*{
     name: json.name,
     stock: json.stock,
     price: json.price
     
-  }; 
+  };*/ 
 }); 
 // Query para listar todos os produtos
 Parse.Cloud.define("list-product", async (request) => {
