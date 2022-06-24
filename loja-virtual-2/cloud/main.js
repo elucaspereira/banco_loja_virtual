@@ -43,11 +43,15 @@ Parse.Cloud.define("update-products", async (request) => {
   const id = request.params.productId;
   if(id == null || id == '') throw "Deve ser informado o id do produto";
 
+  const brand = new Brand();
+  brand.id = request.params.brandId;
+
   const product = new Product();
   product.id = request.params.productId;
   product.set("name", request.params.name);
   product.set("price", request.params.price);
   product.set("stock", request.params.stock);
+  product.set("brand", brand);
   product.set("isSelling", request.params.isSelling);
   const savedProduct = await product.save(null, {useMasterKey: true});
   return "O Pruduto foi atualizado"; 
@@ -69,15 +73,15 @@ Parse.Cloud.define("get-product", async (request) => {
   if(request.params.productId == '') throw "Deve ser informado o Id do produto";
 
   const query = new Parse.Query(Product);
+  query.include("brand");
   const product = await query.get(request.params.productId, {useMasterKey: true});
   const json = product.toJSON();
-  return product;
-  /*{
+  return {
     name: json.name,
     stock: json.stock,
-    price: json.price
-    
-  };*/ 
+    price: json.price,
+    brandName: json.brand != null ? json.brand.name  : null, 
+  };
 }); 
 // Query para listar todos os produtos
 Parse.Cloud.define("list-product", async (request) => {
@@ -109,7 +113,7 @@ Parse.Cloud.define("new-user", async (request) =>{
   const password = request.params.password;
   if(username == null || username == "") throw "O campo username deve ser preenchido";
   if(email == null || email == "") throw "O campo email deve ser preenchido";
-  if(password== null || password == "") throw "O campo password deve ser preenchido";
+  if(password == null || password == "") throw "O campo password deve ser preenchido";
 
   const user = new User();
   user.set("username", request.params.username);
