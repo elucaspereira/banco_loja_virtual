@@ -2,6 +2,7 @@ const Product = Parse.Object.extend("Product");
 const Brand = Parse.Object.extend("Brand");
 
 Parse.Cloud.define("create-product", async (request) => {
+  if(request.user == null) throw "Usuário não autenticado";
   const stock = request.params.stock;
   const price = request.params.price;
 
@@ -18,7 +19,9 @@ Parse.Cloud.define("create-product", async (request) => {
   product.set("price", request.params.price);
   product.set("stock", request.params.stock );
   product.set("brand", brand);
+  product.set("createdBy", request.user);
   product.set("isSelling", request.params.isSelling);
+  
   const savedProduct = await product.save(null, {useMasterKey: true});
   return savedProduct.id
 });
@@ -85,13 +88,18 @@ Parse.Cloud.define("get-product", async (request) => {
 }); 
 // Query para listar todos os produtos
 Parse.Cloud.define("list-product", async (request) => {
+  const page = request.params.page;
+
   const query = new Parse.Query(Product);
   //condições da busca
+  query.equalTo("createdBy", request.user);
   query.equalTo("isSelling", true);
   query.greaterThanOrEqualTo("price", 1000);
-  query.lessThanOrEqualTo("price", 3000);
+  query.lessThanOrEqualTo("price", 10000);
   query.greaterThan("stock", 0);
   query.ascending("stock");
+  query.limit(2);
+  query.skip(page * 2);
   
   const product = await query.find({useMasterKey: true});
   return product.map(function(p) {
@@ -106,19 +114,33 @@ Parse.Cloud.define("list-product", async (request) => {
 });
 
 //criando usuario
-const User = Parse.Object.extend("User");
+
 Parse.Cloud.define("new-user", async (request) =>{
-  const username = request.params.username;
+  const name = request.params.name;
   const email = request.params.email;
   const password = request.params.password;
-  if(username == null || username == "") throw "O campo username deve ser preenchido";
+  if(name == null || name == "") throw "O campo name deve ser preenchido";
   if(email == null || email == "") throw "O campo email deve ser preenchido";
   if(password == null || password == "") throw "O campo password deve ser preenchido";
 
-  const user = new User();
-  user.set("username", request.params.username);
+  const user = new Parse.User();
+  user.set("name", request.params.name);
+  user.set("username", request.params.email);
   user.set("email", request.params.email);
   user.set("password", request.params.password);
-  const savedUser = await user.save(null, {useMasterKey: true});
-  return "Usuário criado com sucesso"
-}); 
+  user.set("city", request.params.city);
+  
+  const savedUser = await user.signUp(null, {useMasterKey: true});
+  return savedUser.get("sessionToken");
+
+  
+});
+Parse.Cloud.define("get-current-user", async (req)=> {
+  return req.user;
+});
+
+Parse.Cloud.define("login", async (req) => {
+  const user = await Parse.User.logIn(req.params.email, req.params.password);
+  return user;
+});
+
